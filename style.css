@@ -38,7 +38,9 @@ form > button:hover {
   display: inline-block;
   text-align: center;
   background-color: #ffc800;
+  margin: 2px;
   vertical-align: bottom;
+  min-width: 30px;
 }
 
 .new {
