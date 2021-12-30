@@ -1,7 +1,17 @@
+
+var svgWidth = 800;
+var svgHeight = 400;
+var barHeight = 500;
+var barPadding = 5;
+var svg = d3.select("svg").attr('width',svgWidth).attr('height',svgHeight)
+
+
+
 d3.select("#reset")
     .on("click", function() {
       d3.selectAll(".letter")
         .remove();
+      d3.selectAll('text').remove()
 
       d3.select("#phrase")
           .text("");
@@ -15,33 +25,47 @@ d3.select("form")
       d3.event.preventDefault();
       var input = d3.select("input");
       var text = input.property("value");
+      var data = getFrequencies(text)
+      var barWidth = svgWidth / data.length - barPadding;
 
-      var letters = d3.select("#letters")
-                      .selectAll(".letter")
-                      .data(getFrequencies(text), function(d) {
-                        return d.character;
-                      });
+      var letters = svg
+                      .selectAll('.letter')
+                      .data(data, (d => d.character))
+
+      console.log(getFrequencies(text));
+
 
       letters
           .classed("new", false)
         .exit()
         .remove();
 
-      letters
+      var letterEnter = letters
         .enter()
-        .append("div")
+        .append("g")
           .classed("letter", true)
           .classed("new", true)
-        .merge(letters)
-          .style("width", "20px")
-          .style("line-height", "20px")
-          .style("margin-right", "5px")
-          .style("height", function(d) {
-            return d.count * 20 + "px";
-          })
-          .text(function(d) {
-            return d.character;
-          });
+
+      letterEnter.append('rect');
+      letterEnter.append('text');
+
+        letterEnter.merge(letters)
+          .select('rect')
+          .attr("width", barWidth )
+          .attr('height',(d => d.count *20))
+          .attr('x', ((d,idx)=> (barWidth   + barPadding) * idx))
+          .attr('y',(d=> svgHeight - d.count *20))
+
+          letterEnter.merge(letters)
+                      .select('text')
+                      .attr('x',(d,idx)=> (barWidth   + barPadding) * idx + barWidth /2 )
+                      .attr('y',(d=> svgHeight - d.count *20 - 10))
+                      .attr('text-anchor','middle')
+                      .text(d=>d.character)
+          
+
+
+
 
       d3.select("#phrase")
           .text("Analysis of: " + text);
